@@ -5,13 +5,19 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.example.entity.Account;
+import com.example.entity.Message;
 import com.example.service.AccountService;
 import com.example.service.MessageService;
 
@@ -59,5 +65,53 @@ public class SocialMediaController {
     if (checkAccount.size() == 0) {
       return  ResponseEntity.status(401).body(null);
     } else { return ResponseEntity.status(200).body(checkAccount.get(0));}
+  }
+
+
+  @PostMapping("messages")
+  public @ResponseBody ResponseEntity<Message> postMessage(@RequestBody Message message) {
+    
+    Message newMessage = messageService.postMessage(message);
+
+    if (newMessage == null) {
+      return ResponseEntity.status(400).body(null);
+    } else {return ResponseEntity.status(200).body(newMessage);}
+
+  }
+
+  @GetMapping("messages")
+  public @ResponseBody ResponseEntity<List<Message>> getAllMessages() {
+    return ResponseEntity.status(200).body(messageService.getMessages());
+  }
+
+  @GetMapping("messages/{messageId}")
+  public @ResponseBody ResponseEntity<Message> getMessage(@PathVariable int messageId){
+    return ResponseEntity.status(200).body(messageService.getMessage(messageId));
+  }
+
+  @DeleteMapping("messages/{messageId}")
+  public @ResponseBody ResponseEntity<Integer> deleteMessage(@PathVariable int messageId){
+      
+    
+  if(messageService.getMessage(messageId) != null){
+    messageService.deleteMessage(messageId);
+      return ResponseEntity.status(200).body(1);}
+   else {return ResponseEntity.status(200).body(null);}
+  }
+
+
+  @PatchMapping("messages/{messageId}")
+  public @ResponseBody ResponseEntity<Integer> updateMessage(
+    @PathVariable int messageId,
+     @RequestBody Message message){
+
+     Integer numUpt = messageService.updateMessage(message.getMessageText(), messageId);
+
+     if ( numUpt == 1 ){ 
+      return ResponseEntity.status(200).body(numUpt);
+     } else {
+      return ResponseEntity.status(400).body(null);
+     }
+
   }
 }
