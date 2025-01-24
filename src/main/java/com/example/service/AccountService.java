@@ -20,8 +20,6 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
-    
-
     public Account findUserByUsername(Account username) {
         return accountRepository.findByusername(username.getUsername()).orElse(null);
     }
@@ -41,9 +39,10 @@ public class AccountService {
 
     public List<Account> userLogin(Account account) {
         if (account.getUsername() != null && account.getPassword() != null) {
-            return accountRepository.
-            findByUsernameAndPassword(
-                account.getUsername(), account.getPassword());
-        } else {return null;}
+            return accountRepository.findByUsernameAndPassword(
+                    account.getUsername(), account.getPassword());
+        } else {
+            return null;
+        }
     }
 }

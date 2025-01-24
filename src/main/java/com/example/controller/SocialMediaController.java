@@ -57,25 +57,27 @@ public class SocialMediaController {
     }
   }
 
-
   @PostMapping("/login")
-  public @ResponseBody ResponseEntity<Account> UserLogin(@RequestBody Account account){
+  public @ResponseBody ResponseEntity<Account> UserLogin(@RequestBody Account account) {
     List<Account> checkAccount = accountService.userLogin(account);
-    
-    if (checkAccount.size() == 0) {
-      return  ResponseEntity.status(401).body(null);
-    } else { return ResponseEntity.status(200).body(checkAccount.get(0));}
-  }
 
+    if (checkAccount.size() == 0) {
+      return ResponseEntity.status(401).body(null);
+    } else {
+      return ResponseEntity.status(200).body(checkAccount.get(0));
+    }
+  }
 
   @PostMapping("messages")
   public @ResponseBody ResponseEntity<Message> postMessage(@RequestBody Message message) {
-    
+
     Message newMessage = messageService.postMessage(message);
 
     if (newMessage == null) {
       return ResponseEntity.status(400).body(null);
-    } else {return ResponseEntity.status(200).body(newMessage);}
+    } else {
+      return ResponseEntity.status(200).body(newMessage);
+    }
 
   }
 
@@ -85,33 +87,46 @@ public class SocialMediaController {
   }
 
   @GetMapping("messages/{messageId}")
-  public @ResponseBody ResponseEntity<Message> getMessage(@PathVariable int messageId){
-    return ResponseEntity.status(200).body(messageService.getMessage(messageId));
+  public @ResponseBody ResponseEntity<Optional<Message>> getMessage(@PathVariable int messageId) {
+    Optional<Message> returnedMessage = messageService.getMessage(messageId);
+
+    if (returnedMessage.isEmpty()) {
+      return ResponseEntity.status(200).body(null);
+    } else {
+      return ResponseEntity.status(200).body(returnedMessage);
+    }
   }
 
   @DeleteMapping("messages/{messageId}")
-  public @ResponseBody ResponseEntity<Integer> deleteMessage(@PathVariable int messageId){
-      
-    
-  if(messageService.getMessage(messageId) != null){
-    messageService.deleteMessage(messageId);
-      return ResponseEntity.status(200).body(1);}
-   else {return ResponseEntity.status(200).body(null);}
-  }
+  public @ResponseBody ResponseEntity<Integer> deleteMessage(@PathVariable int messageId) {
 
+    if (!messageService.getMessage(messageId).isEmpty()) {
+      messageService.deleteMessage(messageId);
+      return ResponseEntity.status(200).body(1);
+    } else {
+      return ResponseEntity.status(200).body(null);
+    }
+  }
 
   @PatchMapping("messages/{messageId}")
   public @ResponseBody ResponseEntity<Integer> updateMessage(
-    @PathVariable int messageId,
-     @RequestBody Message message){
+      @PathVariable int messageId,
+      @RequestBody Message message) {
 
-     Integer numUpt = messageService.updateMessage(message.getMessageText(), messageId);
+    int numUpt = messageService.updateMessage(message.getMessageText(), messageId);
 
-     if ( numUpt == 1 ){ 
-      return ResponseEntity.status(200).body(numUpt);
-     } else {
+    System.out.println(numUpt);
+    if (numUpt != 1) {
       return ResponseEntity.status(400).body(null);
-     }
+    } else {
+      return ResponseEntity.status(200).body(numUpt);
+    }
 
+  }
+
+  @GetMapping("accounts/{accountId}/messages")
+  public @ResponseBody ResponseEntity<List<Message>> getUserMessages(
+      @PathVariable int accountId) {
+    return ResponseEntity.status(200).body(messageService.getUserMessages(accountId));
   }
 }

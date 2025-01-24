@@ -13,42 +13,51 @@ import com.example.repository.MessageRepository;
 @Service
 public class MessageService {
 
-
     private final MessageRepository messageRepository;
     private final AccountRepository accountRepository;
 
     @Autowired
-    public MessageService(MessageRepository messageRepository, AccountRepository accountRepository){
+    public MessageService(MessageRepository messageRepository, AccountRepository accountRepository) {
         this.messageRepository = messageRepository;
         this.accountRepository = accountRepository;
     }
 
-    public Message postMessage(Message message){
-        if (message.getMessageText().length() <= 255 && 
-        message.getMessageText().length() > 0 && 
-        accountRepository.findByaccountId(message.getPostedBy()) != null) {
+    public Message postMessage(Message message) {
+        if (message.getMessageText().length() <= 255 &&
+                message.getMessageText().length() > 0 &&
+                !accountRepository.findById(message.getPostedBy()).isEmpty()) {
             return messageRepository.save(message);
-        } else {return null;}
+        } else {
+            return null;
+        }
     }
 
-    public List<Message> getMessages(){
+    public List<Message> getMessages() {
         return messageRepository.findAll();
     }
 
-    public Message getMessage(int messageId){
-       return messageRepository.findBymessageId(messageId);
+    public Optional<Message> getMessage(int messageId) {
+        return messageRepository.findById(messageId);
     }
 
-    public void deleteMessage(int messageId){
-        messageRepository.deleteById(messageId);
+    public int deleteMessage(int messageId) {
+        return messageRepository.deleteById(messageId);
     }
 
-    public Integer updateMessage(String text, int id){
+    public int updateMessage(String text, int id) {
 
-        if(text.length() > 0 &&
-         text.length() <=255 && 
-         messageRepository.findBymessageId(id) != null){
-        return messageRepository.updateMessage(text, id);
-         } else {return null;}
+        if (text.length() > 0 &&
+                text.length() <= 255 &&
+                !messageRepository.findById((Integer) id).isEmpty()) {
+
+            int response = messageRepository.updateMessage(text, id);
+            return response;
+        } else {
+            return 0;
+        }
+    }
+
+    public List<Message> getUserMessages(int accountId) {
+        return messageRepository.findBypostedBy(accountId);
     }
 }
